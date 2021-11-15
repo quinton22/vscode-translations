@@ -11,10 +11,131 @@ import { NormalizedTranslations, NormalizedTranslationValue } from "../types";
 
 export class JavascriptHoverProvider implements HoverProvider {
   private translations: NormalizedTranslations | null = null;
-  constructor(translations: NormalizedTranslations | null) {
+  private defaultNamespace: string;
+  constructor(
+    translations: NormalizedTranslations | null,
+    defaultNamespace?: string
+  ) {
     this.translations =
       translations !== null ? JSON.parse(JSON.stringify(translations)) : null;
+    this.defaultNamespace = defaultNamespace ?? "translation";
   }
+
+  private translate = (
+    keyAndNamespace: string,
+    options?: Record<string, any>
+  ) => {
+    const [key, ns] = keyAndNamespace.split(":", 2).reverse();
+    if (!this.translations?.[key]) {
+      return undefined;
+    }
+
+    let returnArray = this.translations[key];
+
+    if (ns) {
+      const matchedNamespace = this.translations[key].find(({ namespace }) =>
+        namespace.includes(ns)
+      );
+
+      if (matchedNamespace) {
+        returnArray = [matchedNamespace];
+      }
+    }
+
+    if (options) {
+      // attempt replace
+      returnArray = returnArray.map(({ namespace, text }) => {
+        return {
+          namespace,
+          text: Object.fromEntries(
+            Object.entries(text).map(([lang, val]) => {
+              let newVal = val;
+              for (const [optKey, optVal] of Object.entries(options)) {
+                newVal = newVal.replace(`{{${optKey}}}`, optVal);
+              }
+              return [lang, newVal];
+            })
+          ),
+        };
+      });
+    }
+
+    return returnArray;
+  };
+
+  private substituteTranslations = (
+    ...args: [translation: string, lang: string, maxRecursiveDepth?: number]
+  ) => this.recursivelySubstituteTranslations(...args, 0);
+
+  private recursivelySubstituteTranslations = (
+    translation: string,
+    lang: string,
+    maxRecursiveDepth = 2,
+    recursiveDepth = 0
+  ): string => {
+    const removeSpaces = translation.replace(/\n/g, " ");
+    let regex = /[^\\]?\$t\(\s*(.*?)\s*[,]?\s*({.*?})?\)/g;
+    let splitRegex = /[\\]{0}\$t\(\s*.*?\s*[,]?\s*(?:{.*?})?\)/;
+
+    console.log({ removeSpaces });
+
+    let arrayOfMatches;
+    const arrayOfKeys = [];
+    const arrayOfOptions = [];
+    while ((arrayOfMatches = regex.exec(removeSpaces)) !== null) {
+      arrayOfKeys.push(arrayOfMatches[1]);
+      arrayOfOptions.push(arrayOfMatches[2]);
+    }
+
+    const removedMatches = removeSpaces.split(splitRegex);
+    const insertMatches = [];
+
+    for (let i = 0; i < arrayOfKeys.length; ++i) {
+      const innerKey = arrayOfKeys[i];
+      const innerOptions = arrayOfOptions[i];
+      const innerTranslationArray = this.translate(
+        innerKey,
+        innerOptions ? JSON.parse(innerOptions) : undefined
+      );
+
+      let innerTranslation;
+
+      if (innerTranslationArray) {
+        innerTranslation =
+          innerTranslationArray.length === 1
+            ? innerTranslationArray[0].text[lang]
+            : innerTranslationArray.find(({ namespace }) =>
+                namespace.includes(this.defaultNamespace)
+              )?.text[lang];
+      }
+
+      if (!innerTranslation) {
+        innerTranslation = `$t(${innerKey}${
+          innerOptions ? `, ${JSON.stringify(innerOptions)}` : ""
+        })`;
+      }
+
+      insertMatches.push(innerTranslation);
+    }
+
+    console.log({ insertMatches, removedMatches });
+
+    const returnString =
+      insertMatches.length > 0
+        ? insertMatches.map((value, i) => removedMatches[i] + value).join("")
+        : removedMatches.join("");
+
+    if (recursiveDepth >= maxRecursiveDepth || !returnString.match(regex)) {
+      return returnString;
+    } else {
+      return this.recursivelySubstituteTranslations(
+        returnString,
+        lang,
+        maxRecursiveDepth,
+        ++recursiveDepth
+      );
+    }
+  };
 
   private buildHoverString(translationArray: NormalizedTranslationValue[]) {
     const row = (
@@ -45,7 +166,7 @@ export class JavascriptHoverProvider implements HoverProvider {
           row`${[
             i++ === 0 ? translationObj.namespace.join(", ") : " ",
             lang,
-            text.replace(/\n/g, " "),
+            this.substituteTranslations(text, lang),
           ]}`
         );
       }
@@ -110,26 +231,13 @@ export class JavascriptHoverProvider implements HoverProvider {
     if (line.charAt(strBegin) === "`") {
       str = str.replace(/\${.*?}/g, "");
     }
-    const [key, ns] = str.split(":", 2).reverse();
 
-    if (!this.translations?.[key]) {
+    const returnValue = this.translate(str);
+
+    if (!returnValue) {
       return Promise.reject();
     }
 
-    if (ns) {
-      const matchedNamespace = this.translations[key].find(({ namespace }) =>
-        namespace.includes(ns)
-      );
-
-      if (matchedNamespace) {
-        return Promise.resolve(
-          new Hover(this.buildHoverString([matchedNamespace]))
-        );
-      }
-    }
-
-    return Promise.resolve(
-      new Hover(this.buildHoverString(this.translations[key]))
-    );
+    return Promise.resolve(new Hover(this.buildHoverString(returnValue)));
   }
 }

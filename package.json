@@ -1,0 +1,132 @@
+{
+  "name": "translations",
+  "displayName": "Translations",
+  "description": "",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.61.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onLanguage:javascript",
+    "onLanguage:typescript",
+    "onLanguage:typescriptreact",
+    "onLanguage:javascriptreact"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "configuration": {
+      "title": "Translations",
+      "properties": {
+        "translations.useContentfulTranslations.enabled": {
+          "type": "boolean",
+          "default": false,
+          "description": "Get translations from external source."
+        },
+        "translations.useContentfulTranslations.contentType": {
+          "type": "string",
+          "default": "translation"
+        },
+        "translations.useContentfulTranslations.contentfulConfig": {
+          "markdownDescription": "When `#translations.useContentfulTranslations.enabled#` is `true`, this is used.",
+          "type": "object",
+          "additionalProperties": false,
+          "default": {
+            "host": "",
+            "environment": "",
+            "space": "",
+            "accessToken": ""
+          },
+          "properties": {
+            "host": {
+              "type": "string",
+              "default": "https://cdn.contentful.com",
+              "enum": [
+                "https://cdn.contentful.com",
+                "https://preview.contentful.com"
+              ]
+            },
+            "environment": {
+              "type": "string",
+              "default": "master"
+            },
+            "space": {
+              "type": "string"
+            },
+            "accessToken": {
+              "type": "string"
+            }
+          }
+        },
+        "translations.translationsFileName": {
+          "type": "string",
+          "markdownDescription": "File path to translations, used when `#translations.useContentfulTranslations.enabled#` is `false`",
+          "default": "translations.json"
+        },
+        "translations.translationFileStructure": {
+          "type": "string",
+          "enum": [
+            "{ \"[key]\": { \"[languageCode]\": \"[translation]\" } }",
+            "{ \"[namespace]\": { \"[key]\": { \"[languageCode]\": \"[translation]\" } } }",
+            "{ \"[key]\": \"[translation]\" }"
+          ],
+          "description": "The file structure of the translations file.",
+          "default": "{ \"[namespace]\": { \"[key]\": { \"[languageCode]\": \"[translation]\" } } }"
+        },
+        "translations.translationFileStructureDefaults": {
+          "type": "object",
+          "additionalProperties": false,
+          "default": {
+            "namespace": "translation",
+            "languageCode": "en-US"
+          },
+          "properties": {
+            "namespace": {
+              "type": "string",
+              "default": "translation"
+            },
+            "languageCode": {
+              "type": "string",
+              "default": "en-US"
+            }
+          }
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "yarn run package",
+    "compile": "webpack",
+    "watch": "webpack --watch",
+    "package": "webpack --mode production --devtool hidden-source-map",
+    "compile-tests": "tsc -p . --outDir out",
+    "watch-tests": "tsc -p . -w --outDir out",
+    "pretest": "yarn run compile-tests && yarn run compile && yarn run lint",
+    "lint": "eslint src --ext ts",
+    "test": "node ./out/test/runTest.js"
+  },
+  "devDependencies": {
+    "@types/glob": "^7.1.4",
+    "@types/mocha": "^9.0.0",
+    "@types/node": "14.x",
+    "@types/vscode": "^1.61.0",
+    "@typescript-eslint/eslint-plugin": "^5.1.0",
+    "@typescript-eslint/parser": "^5.1.0",
+    "@vscode/test-electron": "^1.6.2",
+    "eslint": "^8.1.0",
+    "glob": "^7.1.7",
+    "mocha": "^9.1.3",
+    "ts-loader": "^9.2.5",
+    "typescript": "^4.4.4",
+    "webpack": "^5.52.1",
+    "webpack-cli": "^4.8.0"
+  },
+  "dependencies": {
+    "contentful": "^9.1.4",
+    "fs": "^0.0.1-security",
+    "path": "^0.12.7",
+    "vscode-textmate": "^5.4.1"
+  }
+}

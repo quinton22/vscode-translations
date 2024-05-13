@@ -64,7 +64,7 @@ export class Translations {
     // TODO: reload if config changes
 
     const enabledBackends = this.configObserver.current!.get(
-      'backend.backends'
+      'backend.list'
     ) as Array<BackendType>;
 
     const backends = enabledBackends.map((b) => backendModules[b]);

@@ -58,7 +58,7 @@
             "translation is placed next to the string"
           ]
         },
-        "translations.backend.backends": {
+        "translations.backend.list": {
           "type": "array",
           "default": [
             "fileSystem"

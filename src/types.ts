@@ -1,5 +1,5 @@
 export type NormalizedTranslationValue = {
-  namespace: string[];
+  namespace: string;
   text: { [languageCode: string]: string };
 };
 

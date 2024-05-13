@@ -1,4 +1,4 @@
-# vscode-translations
+# translations
 
 This extension uses i18next to display localized text for translation keys in code.
 
@@ -39,9 +39,7 @@ For example if there is an image subfolder under your extension project workspac
 
 ## Release Notes
 
-### 0.0.1
-
----
+See [CHANGELOG](./CHANGELOG.md)
 
 <!--
 Ensure that you've read through the extensions guidelines and follow the best practices for creating your extension.

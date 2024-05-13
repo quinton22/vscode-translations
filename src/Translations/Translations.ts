@@ -168,7 +168,10 @@ export class Translations {
     }
 
     for (const key in this.i18nConfig) {
-      options[key] ??= this.i18nConfig[key as keyof typeof this.i18nConfig];
+      options[key] ??=
+        this.i18nConfig[
+          key as keyof Pick<TOptions, 'ns' | 'fallbackLng' | 'lngs'>
+        ];
     }
     options.defaultValue ||= false;
 

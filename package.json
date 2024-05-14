@@ -2,15 +2,32 @@
   "name": "translations",
   "displayName": "Translations",
   "description": "A vscode extension for displaying localized values or translation keys.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/quinton22/vscode-translations.git"
+  },
+  "publisher": "QuintonHoffman",
+  "icon": "./assets/icon.png",
+  "preview": true,
+  "keywords": [
+    "translation",
+    "translate",
+    "localization",
+    "l10n",
+    "localize"
+  ],
   "version": "0.0.1-alpha",
   "license": "MIT",
   "engines": {
-    "vscode": "^1.61.0",
+    "vscode": "^1.63.0",
     "node": "^18.0.0"
   },
   "categories": [
     "Other"
   ],
+  "sponsor": {
+    "url": "https://github.com/sponsors/quinton22"
+  },
   "activationEvents": [
     "onLanguage:javascript",
     "onLanguage:typescript",

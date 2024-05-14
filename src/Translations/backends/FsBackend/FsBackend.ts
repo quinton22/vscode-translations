@@ -1,16 +1,13 @@
 import I18nextFsBackend from 'i18next-fs-backend';
-import { BaseBackendModule } from '../BaseBackend';
 import {
+  BackendModule,
   MultiReadCallback,
   ReadCallback,
   Resource,
   ResourceLanguage,
 } from 'i18next';
 
-export class FsBackend extends I18nextFsBackend implements BaseBackendModule {
-  allNamespaces: string[] = [];
-  allLanguages: string[] = [];
-
+export class FsBackend extends I18nextFsBackend implements BackendModule {
   read(language: string, namespace: string, callback: ReadCallback): void {
     console.log('Q_DEBUG', 'fsread', language, namespace);
 

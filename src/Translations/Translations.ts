@@ -1,5 +1,5 @@
-//import * as textmate from "vscode-textmate";
 import {
+  BackendModule,
   ExistsFunction,
   InitOptions,
   TFunction,
@@ -7,19 +7,17 @@ import {
   createInstance,
 } from 'i18next';
 import ChainedBackend from 'i18next-chained-backend';
-import { BaseBackendModule, ContentfulBackend, FsBackend } from './backends';
+import { ContentfulBackend, FsBackend } from './backends';
 import { v4 } from 'uuid';
 import { ConfigObserver } from '../Observers';
 import { NormalizedTranslationValue } from '../types';
 
 enum BackendType {
-  fs = 'fileSystem', // required
+  fs = 'fileSystem',
   contentful = 'contentful',
 }
 
 export class Translations {
-  // private static i18nextInstance;
-  private static backendConfig = Translations.getBackend();
   private static i18nInstance = createInstance();
   private static initOptions: any = undefined;
   private static i18nConfig: Pick<TOptions, 'ns' | 'lngs' | 'fallbackLng'> = {};
@@ -53,25 +51,24 @@ export class Translations {
   }
 
   private static getBackend(): {
-    backends: BaseBackendModule[];
-    backendOptions: Parameters<BaseBackendModule['init']>;
+    backends: BackendModule[];
+    backendOptions: any[];
   } {
-    const backendModules: Record<BackendType, BaseBackendModule> = {
+    const backendModules: Record<BackendType, BackendModule> = {
       [BackendType.contentful]: new ContentfulBackend(),
       [BackendType.fs]: new FsBackend(),
     };
 
     // TODO: reload if config changes
 
-    const enabledBackends = this.configObserver.current!.get(
-      'backend.list'
-    ) as Array<BackendType>;
+    const enabledBackends: Array<BackendType> =
+      this.configObserver?.current?.get('backend.list') ?? [];
 
     const backends = enabledBackends.map((b) => backendModules[b]);
 
     const backendOptions = enabledBackends.map((item) =>
-      this.configObserver.current!.get(`backend.${item}Options`)
-    ) as Parameters<BaseBackendModule['init']>;
+      this.configObserver?.current?.get(`backend.${item}Options`)
+    );
 
     return {
       backends,
@@ -99,8 +96,6 @@ export class Translations {
         supportedLngs?: string[];
       }>('i18nOptions') ?? {};
 
-      this.backendConfig = this.getBackend();
-
       await this.load(options, {
         fallbackLng,
         defaultNS,
@@ -116,7 +111,6 @@ export class Translations {
       supportedLngs: Exclude<InitOptions['supportedLngs'], false>;
     }
   ) {
-    console.log('here');
     if (this.i18nInstance.isInitialized && this.initOptions === options) {
       return;
     }
@@ -141,7 +135,7 @@ export class Translations {
         // TODO: save missing feature?
         // saveMissing: true,
         // saveMissingTo: 'all',
-        backend: this.backendConfig,
+        backend: this.getBackend(),
         initImmediate: false,
       },
       (e) => {

@@ -13,7 +13,7 @@ import { ConfigObserver } from '../../Observers/ConfigObserver';
 export class TranslationCodeLensProvider implements CodeLensProvider {
   private parser = stringParser;
   private configObserver = new ConfigObserver('codelens');
-  private isEnabled = this.configObserver.current?.get('enabled');
+  private isEnabled = this.configObserver?.current?.get('enabled');
 
   constructor() {
     if (!Translations.isLoaded) {

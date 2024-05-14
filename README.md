@@ -1,4 +1,4 @@
-# translations
+# Translations
 
 This extension uses i18next to display localized text for translation keys in code.
 

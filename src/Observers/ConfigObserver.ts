@@ -11,7 +11,7 @@ export class ConfigObserver extends Observer<WorkspaceConfiguration> {
 
   constructor(section?: string) {
     super();
-    this._section = 'translations' + section ? `.${section}` : '';
+    this._section = 'translations' + (section ? `.${section}` : '');
     this.next(workspace.getConfiguration(this._section));
     this.disposable = workspace.onDidChangeConfiguration(
       (e) =>

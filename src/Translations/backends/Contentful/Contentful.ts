@@ -5,13 +5,13 @@ import {
   Entry,
 } from 'contentful';
 import {
+  BackendModule,
   MultiReadCallback,
   ReadCallback,
   Resource,
   ResourceLanguage,
   Services,
 } from 'i18next';
-import { BaseBackendModule } from '../BaseBackend';
 
 export type ContentfulTranslation = {
   key: string;
@@ -19,26 +19,7 @@ export type ContentfulTranslation = {
   text: string;
 };
 
-/* 
-export interface Resource {
-  [language: string]: ResourceLanguage;
-}
-
-export interface ResourceLanguage {
-  [namespace: string]: ResourceKey;
-}
-
-export type ResourceKey =
-  | string
-  | {
-      [key: string]: any;
-    };
-*/
-
-export class ContentfulBackend implements BaseBackendModule {
-  allNamespaces: string[] = [];
-  allLanguages: string[] = [];
-
+export class ContentfulBackend implements BackendModule {
   create?(
     languages: readonly string[],
     namespace: string,
@@ -76,13 +57,6 @@ export class ContentfulBackend implements BaseBackendModule {
   //   }
 
   read(language: string, namespace: string, callback: ReadCallback): void {
-    if (!this.allNamespaces.includes(namespace)) {
-      this.allNamespaces.push(namespace);
-    }
-    if (!this.allLanguages.includes(language)) {
-      this.allLanguages.push(language);
-    }
-
     this.getTranslations({
       locale: language,
       'fields.namespace[in]': namespace,
@@ -110,17 +84,6 @@ export class ContentfulBackend implements BaseBackendModule {
     namespaces: readonly string[],
     callback: MultiReadCallback
   ): void {
-    for (const namespace of namespaces) {
-      if (!this.allNamespaces.includes(namespace)) {
-        this.allNamespaces.push(namespace);
-      }
-    }
-    for (const language of languages) {
-      if (!this.allLanguages.includes(language)) {
-        this.allLanguages.push(language);
-      }
-    }
-
     // get namespaces for all languages
     // contentful doesn't allow to use multiple locales in one query
     Promise.all(

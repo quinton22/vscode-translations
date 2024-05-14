@@ -83,7 +83,7 @@ export class TranslationEditorDecorationProvider implements Disposable {
         // TODO: setting for position of inline text
 
         const pos =
-          this.configObserver.current!.get<DecorationPosition>('position');
+          this.configObserver?.current?.get<DecorationPosition>('position');
 
         const range = new Range(
           this.editor!.document.positionAt(t.indices[0]),

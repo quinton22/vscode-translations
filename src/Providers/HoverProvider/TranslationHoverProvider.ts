@@ -14,7 +14,7 @@ import { ConfigObserver } from '../../Observers';
 export class TranslationHoverProvider implements HoverProvider {
   private parser = stringParser;
   private configObserver = new ConfigObserver('hover');
-  private isEnabled = this.configObserver.current?.get('enabled');
+  private isEnabled = this.configObserver?.current?.get('enabled');
 
   public static supportedLanguages = [
     'javascript',
@@ -72,9 +72,6 @@ export class TranslationHoverProvider implements HoverProvider {
     if (!value) {
       return Promise.reject();
     }
-
-    const v = Translations.translate('testKey');
-    console.log('Q_DEBUG', 'testKey', v);
 
     return Promise.resolve(
       new Hover(

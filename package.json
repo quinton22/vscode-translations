@@ -16,7 +16,7 @@
     "l10n",
     "localize"
   ],
-  "version": "0.0.1-alpha",
+  "version": "0.1.0",
   "license": "MIT",
   "engines": {
     "vscode": "^1.63.0",

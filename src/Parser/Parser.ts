@@ -21,6 +21,32 @@ export class Parser {
       .sort((a, b) => a.priority - b.priority);
   }
 
+  private getStartSearchText(
+    text: string,
+    {
+      window = 1,
+      index = 0,
+    }: { window?: number; index?: number | [start: number, end: number] },
+    idx: number
+  ) {
+    const [i, j] = typeof index === 'object' ? index : [index, index];
+    if (idx < i && window > 1 && i > 0) {
+      const spaces = new Array(window - i).fill(' ').join('');
+
+      return {
+        text: `${spaces}${text.slice(0, window)}`,
+        index: [i, j],
+        adjustment: window - i,
+      };
+    }
+
+    return {
+      text: text.slice(0, window),
+      index: [i, j],
+      adjustment: 0,
+    };
+  }
+
   private parseAtIndex(
     text: string,
     index: number
@@ -40,10 +66,15 @@ export class Parser {
     }
 
     let match, token;
+
+    const t = text.slice(index);
+
     for (token of this.tokens) {
-      const startWindow = token.start.window ?? 1;
-      const t = text.slice(index);
-      const t1 = t.slice(0, startWindow);
+      const {
+        text: t1,
+        index: [startIndex1, startIndex2],
+        adjustment,
+      } = this.getStartSearchText(t, token.start, index);
 
       if (typeof token.start.search === 'string') {
         match = t1.startsWith(token.start.search);
@@ -55,20 +86,13 @@ export class Parser {
         continue;
       }
 
-      let startIndex1 = 0,
-        startIndex2 = 0;
-
-      if (typeof token.start.index === 'object') {
-        [startIndex1, startIndex2] = token.start.index;
-      } else if (!!token.start.index) {
-        startIndex1 = token.start.index;
-        startIndex2 = startIndex1;
-      }
-
       if (token.end === undefined) {
         return {
           token: {
-            indices: [index + startIndex1, index + startIndex2],
+            indices: [
+              index + startIndex1 - adjustment,
+              index + startIndex2 - adjustment,
+            ],
             name: token.name,
             text: t1.slice(startIndex1, startIndex2 + 1),
           },
@@ -76,7 +100,7 @@ export class Parser {
       }
 
       const endWindow = token.end.window ?? 1;
-      const t2Index = startIndex2 + 1 - (endWindow - 1);
+      const t2Index = startIndex2 + 1 - (endWindow - 1) - adjustment;
       const t2 = t.slice(t2Index);
       let index2;
 
@@ -92,7 +116,7 @@ export class Parser {
             ? token.end.index[1]
             : token.end.index ?? 0;
 
-        const start = index + startIndex1;
+        const start = index + startIndex1 - adjustment;
         const end = index + t2Index + index2 + endIndex;
         return {
           token: {

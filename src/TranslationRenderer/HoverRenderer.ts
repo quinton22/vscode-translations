@@ -2,7 +2,7 @@ import { MarkdownString } from 'vscode';
 import { NormalizedTranslationValue } from '../types';
 import { TranslationRenderFn } from './TranslationRenderer';
 
-const initial = `| Namespaces\u00a0\u00a0\u200b | Language\u00a0\u00a0\u200b | Text\u00a0\u00a0\u200b |
+const initial = `| Namespace\u00a0\u00a0\u200b | Language\u00a0\u00a0\u200b | Text\u00a0\u00a0\u200b |
 |:---|:---|:---|
 `;
 

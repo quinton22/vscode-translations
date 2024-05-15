@@ -47,142 +47,155 @@
         }
       }
     ],
-    "configuration": {
-      "title": "Translations",
-      "properties": {
-        "translations.hover.enabled": {
-          "type": "boolean",
-          "default": false,
-          "description": "View translations when hovering over a string."
-        },
-        "translations.codelens.enabled": {
-          "type": "boolean",
-          "default": false,
-          "description": "Insert a codelens above the string that displays the first 30 characters of the default language translation. When clicked, it will show the translations in an info popup."
-        },
-        "translations.inline.enabled": {
-          "type": "boolean",
-          "default": true,
-          "description": "Insert the translation inline"
-        },
-        "translations.inline.position": {
-          "type": "string",
-          "default": "endOfLine",
-          "enum": [
-            "endOfLine",
-            "adjacent"
-          ],
-          "enumDescriptions": [
-            "translation is placed after the last character of the line it is in",
-            "translation is placed next to the string"
-          ]
-        },
-        "translations.backend.list": {
-          "type": "array",
-          "default": [
-            "fileSystem"
-          ],
-          "minItems": 1,
-          "uniqueItems": true,
-          "items": {
+    "configuration": [
+      {
+        "title": "Translations",
+        "properties": {
+          "translations.hover.enabled": {
+            "type": "boolean",
+            "default": false,
+            "description": "View translations when hovering over a string."
+          },
+          "translations.codelens.enabled": {
+            "type": "boolean",
+            "default": false,
+            "description": "Insert a codelens above the string that displays the first 30 characters of the default language translation. When clicked, it will show the translations in an info popup."
+          },
+          "translations.inline.enabled": {
+            "type": "boolean",
+            "default": true,
+            "description": "Insert the translation inline"
+          },
+          "translations.inline.position": {
             "type": "string",
+            "default": "endOfLine",
             "enum": [
-              "fileSystem",
-              "contentful"
+              "endOfLine",
+              "adjacent"
+            ],
+            "enumDescriptions": [
+              "translation is placed after the last character of the line it is in",
+              "translation is placed next to the string"
             ]
-          },
-          "description": "The backends for the translations. If a translation is not found in the initial backend, it checks the next."
-        },
-        "translations.backend.fileSystemOptions": {
-          "markdownDescription": "When `#translations.backend.backends#` includes `fileSystem`, this is the backend options.",
-          "type": "object",
-          "additionalProperties": false,
-          "default": {
-            "loadPath": "",
-            "addPath": ""
-          },
-          "examples": [
-            "/locales/{{lng}}/{{ns}}.json"
-          ],
-          "properties": {
-            "loadPath": {
-              "type": "string",
-              "examples": [
-                "/locales/{{lng}}/{{ns}}.json"
-              ]
-            },
-            "addPath": {
-              "type": "string",
-              "examples": [
-                "./locales/{{lng}}/{{ns}}.missing.json"
-              ]
-            }
           }
-        },
-        "translations.backend.contentfulOptions": {
-          "markdownDescription": "When `#translations.backend.backends#` includes `contentful`, this describes the config.",
-          "type": "object",
-          "additionalProperties": false,
-          "default": {
-            "host": "",
-            "environment": "",
-            "space": "",
-            "accessToken": ""
-          },
-          "properties": {
-            "host": {
+        }
+      },
+      {
+        "title": "Backend",
+        "properties": {
+          "translations.backend.list": {
+            "order": 0,
+            "type": "array",
+            "default": [
+              "fileSystem"
+            ],
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {
               "type": "string",
-              "default": "https://cdn.contentful.com",
               "enum": [
-                "https://cdn.contentful.com",
-                "https://preview.contentful.com"
+                "fileSystem",
+                "contentful"
               ]
             },
-            "environment": {
-              "type": "string",
-              "default": "master"
+            "description": "The backends for the translations. If a translation is not found in the initial backend, it checks the next."
+          },
+          "translations.backend.fileSystemOptions": {
+            "markdownDescription": "When `#translations.backend.backends#` includes `fileSystem`, this is the backend options.",
+            "type": "object",
+            "additionalProperties": false,
+            "default": {
+              "loadPath": "",
+              "addPath": ""
             },
-            "space": {
-              "type": "string"
+            "examples": [
+              "/locales/{{lng}}/{{ns}}.json"
+            ],
+            "properties": {
+              "loadPath": {
+                "type": "string",
+                "examples": [
+                  "/locales/{{lng}}/{{ns}}.json"
+                ]
+              },
+              "addPath": {
+                "type": "string",
+                "examples": [
+                  "./locales/{{lng}}/{{ns}}.missing.json"
+                ]
+              }
+            }
+          },
+          "translations.backend.contentfulOptions": {
+            "markdownDescription": "When `#translations.backend.backends#` includes `contentful`, this describes the config.",
+            "type": "object",
+            "additionalProperties": false,
+            "default": {
+              "host": "",
+              "environment": "",
+              "space": "",
+              "accessToken": ""
             },
-            "accessToken": {
-              "type": "string"
+            "properties": {
+              "host": {
+                "type": "string",
+                "default": "https://cdn.contentful.com",
+                "enum": [
+                  "https://cdn.contentful.com",
+                  "https://preview.contentful.com"
+                ]
+              },
+              "environment": {
+                "type": "string",
+                "default": "master"
+              },
+              "space": {
+                "type": "string"
+              },
+              "accessToken": {
+                "type": "string"
+              }
             }
           }
-        },
-        "translations.i18nOptions.namespaces": {
-          "description": "Namespaces to search for translations",
-          "type": "array",
-          "default": [
-            "translation"
-          ],
-          "uniqueItems": true,
-          "items": {
+        }
+      },
+      {
+        "title": "I18n Options",
+        "properties": {
+          "translations.i18nOptions.namespaces": {
+            "description": "Namespaces to search for translations",
+            "type": "array",
+            "default": [
+              "translation"
+            ],
+            "uniqueItems": true,
+            "items": {
+              "type": "string"
+            }
+          },
+          "translations.i18nOptions.supportedLngs": {
+            "description": "Supported languages for translations",
+            "type": "array",
+            "default": [
+              "en-US"
+            ],
+            "uniqueItems": true,
+            "items": {
+              "type": "string"
+            }
+          },
+          "translations.i18nOptions.defaultNS": {
+            "markdownDescription": "Default namespace for translations, will default to `translation`.",
             "type": "string"
+          },
+          "translations.i18nOptions.fallbackLng": {
+            "description": "Fallback language for translations",
+            "type": "string",
+            "default": "en-US"
           }
-        },
-        "translations.i18nOptions.supportedLngs": {
-          "description": "Supported languages for translations",
-          "type": "array",
-          "default": [
-            "en-US"
-          ],
-          "uniqueItems": true,
-          "items": {
-            "type": "string"
-          }
-        },
-        "translations.i18nOptions.defaultNS": {
-          "markdownDescription": "Default namespace for translations, will default to `translation`.",
-          "type": "string"
-        },
-        "translations.i18nOptions.fallbackLng": {
-          "description": "Fallback language for translations",
-          "type": "string",
-          "default": "en-US"
         }
       }
-    },
+    ],
     "commands": [
       {
         "command": "translations.updateTranslations",

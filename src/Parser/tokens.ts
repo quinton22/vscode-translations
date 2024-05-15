@@ -39,7 +39,7 @@ export const backQuote: Token = {
 
 export const lineComment: Token = {
   start: { search: '//', index: [0, 1], window: 2 },
-  end: { search: /$/m },
+  end: { search: /$/m, index: -1 },
   priority: 1,
 };
 

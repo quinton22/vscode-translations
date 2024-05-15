@@ -11,6 +11,7 @@ import { ContentfulBackend, FsBackend } from './backends';
 import { v4 } from 'uuid';
 import { ConfigObserver } from '../Observers';
 import { NormalizedTranslationValue } from '../types';
+import { WorkspaceConfiguration } from 'vscode';
 
 enum BackendType {
   fs = 'fileSystem',
@@ -24,6 +25,7 @@ export class Translations {
   private static _isLoaded = false;
   private static onLoadFns = new Map<string, () => void>();
   private static configObserver = new ConfigObserver();
+  private static unsubscribe?: () => void;
 
   public static get isLoaded() {
     return this._isLoaded;
@@ -59,15 +61,13 @@ export class Translations {
       [BackendType.fs]: new FsBackend(),
     };
 
-    // TODO: reload if config changes
-
     const enabledBackends: Array<BackendType> =
-      this.configObserver?.current?.get('backend.list') ?? [];
+      this.configObserver.current?.get('backend.list') ?? [];
 
     const backends = enabledBackends.map((b) => backendModules[b]);
 
     const backendOptions = enabledBackends.map((item) =>
-      this.configObserver?.current?.get(`backend.${item}Options`)
+      this.configObserver.current?.get(`backend.${item}Options`)
     );
 
     return {
@@ -83,54 +83,59 @@ export class Translations {
 
     this.initOptions = options;
 
-    this.configObserver.subscribe(async (config) => {
-      const {
-        fallbackLng = false,
-        defaultNS,
-        namespaces: ns = ['translation'],
-        supportedLngs = ['en-US'],
-      } = config.get<{
-        fallbackLng?: string;
-        defaultNS?: string;
-        namespaces?: string | string[];
-        supportedLngs?: string[];
-      }>('i18nOptions') ?? {};
+    if (this.configObserver.current) {
+      await this.load(options, this.configObserver.current);
+    }
 
-      await this.load(options, {
-        fallbackLng,
-        defaultNS,
-        ns,
-        supportedLngs,
-      });
+    this.unsubscribe?.();
+
+    this.unsubscribe = this.configObserver.subscribe(async (config) => {
+      await this.load(options, config);
     });
   }
 
   private static async load(
     options: Omit<InitOptions, 'ns' | 'load'>,
-    userConfig: Pick<InitOptions, 'fallbackLng' | 'defaultNS' | 'ns'> & {
-      supportedLngs: Exclude<InitOptions['supportedLngs'], false>;
-    }
+    config: WorkspaceConfiguration
   ) {
-    if (this.i18nInstance.isInitialized && this.initOptions === options) {
+    this.initOptions = options;
+
+    let {
+      defaultNS,
+      namespaces: ns = ['translation'],
+      supportedLngs = ['en-US'],
+    } = config.get<{
+      defaultNS?: string;
+      namespaces?: string | string[];
+      supportedLngs?: string[];
+    }>('i18nOptions') ?? {};
+
+    defaultNS ||= undefined;
+
+    const i18nConfig = {
+      ns: typeof ns === 'string' ? [ns] : ns,
+      lngs: supportedLngs,
+    };
+
+    if (
+      this.i18nInstance.isInitialized &&
+      this.initOptions === options &&
+      this.i18nConfig === i18nConfig
+    ) {
       return;
     }
 
-    this.initOptions = options;
-
-    userConfig.defaultNS ||= undefined;
-
-    this.i18nConfig = {
-      ns: typeof userConfig.ns === 'string' ? [userConfig.ns] : userConfig.ns,
-      lngs: userConfig.supportedLngs,
-    };
+    this.i18nConfig = i18nConfig;
 
     await this.i18nInstance.use(ChainedBackend).init(
       {
         ...options,
         debug: true,
-        ...userConfig,
-        fallbackNS: userConfig.defaultNS ?? ['translation'],
-        preload: userConfig.supportedLngs,
+        defaultNS,
+        ns,
+        supportedLngs,
+        fallbackNS: defaultNS ?? ['translation'],
+        preload: supportedLngs,
         load: 'currentOnly' as const,
         // TODO: save missing feature?
         // saveMissing: true,
@@ -202,7 +207,6 @@ export class Translations {
 
     const namespaces =
       (typeof options.ns === 'string' ? [options.ns] : options.ns) ?? [];
-
     const languages = options?.lngs ?? [];
 
     return namespaces
@@ -212,7 +216,12 @@ export class Translations {
           languages
             .map((lng) => [
               lng,
-              this.i18nInstance.t(key, { ...options, ns, lng }),
+              this.i18nInstance.t(key, {
+                ...options,
+                ns,
+                lng,
+                lngs: undefined,
+              }),
             ])
             .filter(([_, v]) => !!v)
         ),

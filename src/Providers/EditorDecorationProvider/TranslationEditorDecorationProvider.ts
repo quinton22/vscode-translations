@@ -10,7 +10,6 @@ import {
 } from 'vscode';
 import { getStringContentsFromToken, stringParser } from '../../Parser';
 import { Translations } from '../../Translations';
-import { hoverRenderer } from '../../TranslationRenderer';
 import { ConfigObserver } from '../../Observers';
 
 export enum DecorationPosition {
@@ -26,21 +25,43 @@ const decorationType: TextEditorDecorationType =
 export class TranslationEditorDecorationProvider implements Disposable {
   private editor: TextEditor | undefined;
   private parser = stringParser;
-  private listener: Disposable;
+  private listener?: Disposable;
+  private unsubscribe?: () => void;
   private configObserver = new ConfigObserver('inline');
+  private isEnabled = false;
 
   constructor() {
+    this.enable();
+    this.unsubscribe = this.configObserver.subscribe((config) => {
+      const enabled = config.get('enabled');
+      if (enabled && !this.isEnabled) {
+        this.enable();
+      } else if (!enabled && this.isEnabled) {
+        this.disable();
+      }
+
+      this.refresh();
+    });
+  }
+
+  private enable() {
     this.updateEditor(window.activeTextEditor);
     this.listener = Disposable.from(
       window.onDidChangeActiveTextEditor(this.updateEditor.bind(this)),
       workspace.onDidSaveTextDocument(this.refresh.bind(this)),
       Translations.onLoad(this.refresh.bind(this))
     );
+    this.isEnabled = true;
+  }
+
+  private disable() {
+    this.clear();
+    this.listener?.dispose();
   }
 
   dispose() {
-    this.clear();
-    this.listener.dispose();
+    this.disable();
+    this.unsubscribe?.();
   }
 
   updateEditor(editor: TextEditor | undefined) {
@@ -80,10 +101,10 @@ export class TranslationEditorDecorationProvider implements Disposable {
     this.editor.setDecorations(
       decorationType,
       tokens.map((t) => {
-        // TODO: setting for position of inline text
-
         const pos =
           this.configObserver?.current?.get<DecorationPosition>('position');
+
+        const isEol = pos === DecorationPosition.eol;
 
         const range = new Range(
           this.editor!.document.positionAt(t.indices[0]),
@@ -95,16 +116,21 @@ export class TranslationEditorDecorationProvider implements Disposable {
           this.editor!.document.lineAt(range.end).range.end
         );
 
+        const after = {
+          ...(isEol && {
+            fontStyle: 'italic',
+            margin: '0 0 0 1em',
+          }),
+          contentText: `${isEol ? '' : '|'}${Translations.translate(t.text)}`,
+          color: new ThemeColor('translations.decorationTextColor'),
+        };
+
         return {
           range: pos === DecorationPosition.eol ? eolRange : range,
-          hoverMessage: hoverRenderer(Translations.getAllTranslations(t.text)),
+          // don't need this since it is included in hover provider
+          // hoverMessage: hoverRenderer(Translations.getAllTranslations(t.text)),
           renderOptions: {
-            after: {
-              fontStyle: 'italic',
-              margin: '0 0 0 1em',
-              contentText: Translations.translate(t.text),
-              color: new ThemeColor('translations.decorationTextColor'),
-            },
+            after,
           },
         };
       })

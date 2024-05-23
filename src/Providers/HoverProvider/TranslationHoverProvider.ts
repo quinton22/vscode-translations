@@ -5,6 +5,7 @@ import {
   Hover,
   HoverProvider,
   Range,
+  WorkspaceConfiguration,
 } from 'vscode';
 import { getStringContentsFromToken, stringParser } from '../../Parser';
 import { Translations } from '../../Translations';
@@ -23,15 +24,18 @@ export class TranslationHoverProvider implements HoverProvider {
     'typescriptreact',
   ];
 
+  private refresh(config?: WorkspaceConfiguration) {
+    config ??= this.configObserver.current;
+    this.isEnabled = config?.get('enabled');
+  }
+
   constructor() {
     if (!Translations.isLoaded) {
       Translations.init({});
     }
 
     // TODO: need to unsubscribe at some point
-    this.configObserver.subscribe((config) => {
-      this.isEnabled = config.get('enabled');
-    });
+    this.configObserver.subscribe((config) => this.refresh(config));
   }
 
   // public updateTranslations(translations: NormalizedTranslations | null) {
@@ -43,13 +47,19 @@ export class TranslationHoverProvider implements HoverProvider {
     position: Position,
     token: CancellationToken
   ): Thenable<Hover> {
-    if (!this.isEnabled) {
-      Promise.reject();
+    if (this.isEnabled === undefined) {
+      this.refresh();
     }
 
-    token.onCancellationRequested(() => Promise.reject());
+    if (!this.isEnabled || !Translations.isLoaded) {
+      return Promise.reject();
+    }
 
     const line = document.lineAt(position).text;
+
+    if (token.isCancellationRequested) {
+      return Promise.reject();
+    }
 
     const tokens = this.parser.parse(line, 'quote');
     let t = tokens.find(
@@ -67,9 +77,17 @@ export class TranslationHoverProvider implements HoverProvider {
       return Promise.reject();
     }
 
+    if (token.isCancellationRequested) {
+      return Promise.reject();
+    }
+
     const value = Translations.getAllTranslations(t.text);
 
     if (!value) {
+      return Promise.reject();
+    }
+
+    if (token.isCancellationRequested) {
       return Promise.reject();
     }
 

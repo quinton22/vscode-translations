@@ -83,6 +83,9 @@ export class TranslationEditorDecorationProvider implements Disposable {
   }
 
   create() {
+    console.log('[Translations]', 'create');
+    console.log('[Translations]', 'create', Translations.isLoaded);
+
     if (
       !this.editor ||
       !Translations.isLoaded ||

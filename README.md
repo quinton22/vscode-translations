@@ -2,6 +2,22 @@
 
 This extension uses i18next to display localized text for translation keys in code.
 
+## Setup
+
+Several translation backends are supported and can be used in conjunction by updating the order in [Backend > List](#setting_list) setting.
+
+A backend must be selected, otherwise no translations will be loaded.
+
+Additionally, the [I18n Options](#setting_i18nOptions) settings are required unless the default suffices. [I18n Options > Namespaces](#setting_namespaces) are the possible namespaces, and [I18n Options > Supported Lngs](#setting_supportedLngs) are all the possible languages. Without these, the extension will not function properly.
+
+### Contentful
+
+To enable Contentful backend, add `contentful` to the [Backend > List](#setting_list) setting. Then fill in all the required settings in [Backend > Contentful Options](#setting_contentfulOptions) seen below.
+
+### File System
+
+To enable File System backend, add `fileSystem` to the [Backend > List](#setting_list) setting. Add the load path according to the [Backend > File System Options](#setting_fileSystemOptions) setting below
+
 ## Features
 
 - Inline translations
@@ -26,12 +42,17 @@ This extension uses i18next to display localized text for translation keys in co
   - `enabled`: enable/disable inline value of key in default language
   - `position`: position to show the value of the key, either end of line or adjacent to key
 - `translations.backend`
-  - `list`: list of backends to use and the order in which to use them. Currently supports `File System` and `Contentful`
-  - `fileSystemOptions`: options to pass to the file system backend
-  - `contentfulOptions`: options to pass to the contentful backend
-- `translations.i18nOptions`
-  - `namespaces`: namespaces to search for translations
-  - `supportedLngs`: list of all supported languages for translating purposes
+  - `list`: list of backends to use and the order in which to use them. Currently supports `File System` and `Contentful`. If more than one item exists in the list, the first will be primary and the rest used as a backup in the case of a missing key in the primary.<a name="setting_list"></a>
+  - `fileSystemOptions`: <a name="setting_fileSystemOptions"></a>options to pass to the file system backend, the following is required:
+    - loadPath: the path from where to load translations. It contain `{{lng}}` and `{{ns}}`.
+  - `contentfulOptions`: <a name="setting_contentfulOptions"></a>options to pass to the contentful backend, the following are required:
+    - host: either `https://cdn.contentful.com` or `https://preview.contentful.com`
+    - environment: "master" or another environment
+    - space: the contentful space id to use
+    - accessToken: the access token generated in Contentful settings.
+- `translations.i18nOptions`<a name="setting_i18nOptions"></a>
+  - `namespaces`: namespaces to search for translations<a name="setting_namespaces"></a>
+  - `supportedLngs`: list of all supported languages for translating purposes<a name="setting_supportedLngs"></a>
   - `defaultNs`: default namespace for translations, will default to `translation`
   - `fallbackLng`: fallback language for translations, defaults to `en-US`
 

@@ -101,12 +101,11 @@
             "description": "The backends for the translations. If a translation is not found in the initial backend, it checks the next."
           },
           "translations.backend.fileSystemOptions": {
-            "markdownDescription": "When `#translations.backend.backends#` includes `fileSystem`, this is the backend options.",
+            "markdownDescription": "When `#translations.backend.backends#` includes `fileSystem`, this is the backend options. `loadPath` is required. If it starts with `/` or `\\` it will be interpreted as an absolute path, otherwise it will be relative to the current workspace's root folder. If `$HOME` is set, then `~/` will be replaced with `$HOME/`.",
             "type": "object",
             "additionalProperties": false,
             "default": {
-              "loadPath": "",
-              "addPath": ""
+              "loadPath": ""
             },
             "examples": [
               "/locales/{{lng}}/{{ns}}.json"
@@ -116,12 +115,6 @@
                 "type": "string",
                 "examples": [
                   "/locales/{{lng}}/{{ns}}.json"
-                ]
-              },
-              "addPath": {
-                "type": "string",
-                "examples": [
-                  "./locales/{{lng}}/{{ns}}.missing.json"
                 ]
               }
             }

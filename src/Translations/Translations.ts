@@ -26,6 +26,7 @@ export class Translations {
   private static onLoadFns = new Map<string, () => void>();
   private static configObserver = new ConfigObserver();
   private static unsubscribe?: () => void;
+  private static loadError?: boolean;
 
   public static get isLoaded() {
     return this._isLoaded;
@@ -144,11 +145,15 @@ export class Translations {
         initImmediate: false,
       },
       (e) => {
+        this.isLoaded = true;
         if (e) {
-          console.error('[Translations]', e);
-        } else {
-          this.isLoaded = true;
+          console.error('[Translations]', 'Error loading translations', e);
+          // TODO: display error popup
+          this.loadError = true;
+          return;
         }
+
+        this.loadError = undefined;
       }
     );
   }
@@ -181,7 +186,7 @@ export class Translations {
     try {
       return this.i18nInstance.exists(...this.getOptions(...args));
     } catch (e) {
-      console.error('[Translations]', e);
+      console.error('[Translations]', 'exists', e);
     }
   }
 
@@ -189,7 +194,7 @@ export class Translations {
     try {
       return this.i18nInstance.t(...this.getOptions(...args));
     } catch (e) {
-      console.error('[Translations]', e);
+      console.error('[Translations]', 'translate', e);
     }
   }
 
@@ -209,23 +214,28 @@ export class Translations {
       (typeof options.ns === 'string' ? [options.ns] : options.ns) ?? [];
     const languages = options?.lngs ?? [];
 
-    return namespaces
-      .map((ns) => ({
-        namespace: ns,
-        text: Object.fromEntries(
-          languages
-            .map((lng) => [
-              lng,
-              this.i18nInstance.t(key, {
-                ...options,
-                ns,
+    try {
+      return namespaces
+        .map((ns) => ({
+          namespace: ns,
+          text: Object.fromEntries(
+            languages
+              .map((lng) => [
                 lng,
-                lngs: undefined,
-              }),
-            ])
-            .filter(([_, v]) => !!v)
-        ),
-      }))
-      .filter((v) => Object.keys(v.text).length > 0);
+                this.i18nInstance.t(key, {
+                  ...options,
+                  ns,
+                  lng,
+                  lngs: undefined,
+                }),
+              ])
+              .filter(([_, v]) => !!v)
+          ),
+        }))
+        .filter((v) => Object.keys(v.text).length > 0);
+    } catch (e) {
+      console.warn('[Translations]', 'getAllTranslations', e);
+      return [];
+    }
   }
 }

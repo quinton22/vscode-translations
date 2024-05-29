@@ -40,7 +40,7 @@ jobs:
           ref: ${{ env.BRANCH }}
       # TODO: verify if version is different than main branch, if not then version bump
       - name: Setup
-        uses: ./.github/actions/setup/action.yml
+        uses: ./.github/actions/setup
       - name: Package
         run: yarn vsce package${{env.RELEASE}}
       - run: |
@@ -59,7 +59,7 @@ jobs:
 
         run: yarn vsce publish${{env.RELEASE}} -p ${{env.VSCE_PAT}}
       - name: Merge
-        uses: ./.github/actions/merge/action.yml
+        uses: ./.github/actions/merge
         with:
           base: main
           branch: ${{ env.BRANCH }}

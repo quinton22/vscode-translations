@@ -14,6 +14,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Setup
-        uses: ./.github/actions/setup/action.yml
+        uses: ./.github/actions/setup
       - name: Run command - ${{ matrix.command }}
         run: yarn ${{ matrix.command }}

@@ -8,7 +8,6 @@
   },
   "publisher": "QuintonHoffman",
   "icon": "./assets/icon.png",
-  "preview": true,
   "release": {
     "branches": [
       "setup-ci",

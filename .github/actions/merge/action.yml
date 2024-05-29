@@ -21,3 +21,4 @@ runs:
       uses: actions/checkout@v4
       run: |
         git merge ${{ inputs.branch }}
+        git push

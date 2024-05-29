@@ -7,10 +7,10 @@ on:
         required: true
         type: boolean
         default: false
-      release_type:
-        required: true
-        type: string
-        default: patch
+      # release_type:
+      #   required: true
+      #   type: string
+      #   default: patch
 
   workflow_dispatch:
     inputs:
@@ -18,31 +18,46 @@ on:
         required: false
         type: boolean
         default: false
-      release_type:
-        required: true
-        type: choice
-        options:
-          - major
-          - minor
-          - patch
-        default: patch
+      # release_type:
+      #   required: true
+      #   type: choice
+      #   options:
+      #     - major
+      #     - minor
+      #     - patch
+      #   default: patch
 
 jobs:
   release:
     runs-on: ubuntu-latest
+    env:
+      BRANCH: ${{ inputs.prerelease == 'true' && 'prerelease' || 'release' }}
+      RELEASE: ${{ inputs.prerelease == 'true' && ' --pre-release' }}
     steps:
       # TODO: verify if version is different than main branch, if not then version bump
       - name: Setup
-        uses: ./.github/actions/setup.yml
-        with: ${{ inputs.prerelease == 'true' && 'prerelease' || 'release' }}
+        uses: ./.github/actions/setup/action.yml
+        with:
+          branch: ${{ env.BRANCH }}
       - name: Package
-        run: yarn run vscode:prepublish
+        run: yarn vsce package${{env.RELEASE}}
+      - run: |
+          VSIX_PATH=$(find . -maxdepth 1 -type f -iname "*.vsix" | head -1)
+          echo "VSIX_PATH=$VSIX_PATH" >> $GITHUB_ENV
+          echo "VSIX_NAME=$(basename $VSIX_PATH)" >> $GITHUB_ENV
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          path: ${{ env.VSIX_PATH }}
+          name: ${{ env.VSIX_NAME }}
       - name: Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          RELEASE_STR: ${{ inputs.prerelease == 'true' && ' --pre-release' || '' }}
-          MARKETPLACE_ACCESS_TOKEN: ${{secrets.MARKETPLACE_ACCESS_TOKEN}}
-        run: yarn semantic-release
-        # run: yarn vsce publish --yarn${{env.RELEASE_STR}} -p ${{env.MARKETPLACE_ACCESS_TOKEN}}
+          VSCE_PAT: ${{secrets.MARKETPLACE_ACCESS_TOKEN}}
+
+        run: yarn vsce publish${{env.RELEASE}} -p ${{env.VSCE_PAT}}
       - name: Merge
-        run: /.github/actions/merge.yml
+        uses: ./.github/actions/merge/action.yml
+        with:
+          base: main
+          branch: ${{ env.BRANCH }}

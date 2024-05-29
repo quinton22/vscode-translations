@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        command: ['typecheck', 'lint', 'test']
+        command: ['typecheck', 'lint', 'test:ci']
     steps:
       - name: Checkout
         uses: actions/checkout@v4

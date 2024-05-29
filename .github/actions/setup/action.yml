@@ -1,19 +1,9 @@
 name: Setup
 description: Checkout repo and setup node
 
-inputs:
-  branch:
-    description: the branch to checkout
-    required: false
-    default: main
-
 runs:
   using: composite
   steps:
-    - name: Checkout
-      uses: actions/checkout@v4
-      with:
-        ref: ${{ inputs.branch }}
     - name: Setup node
       uses: actions/setup-node@v4
       with:

@@ -62,7 +62,7 @@ export class ContentfulBackend implements BackendModule {
       // eslint-disable-next-line @typescript-eslint/naming-convention
       'fields.namespace[in]': namespace,
       // eslint-disable-next-line @typescript-eslint/naming-convention
-      content_type: 'translation',
+      content_type: 'translation', // TODO: make user input
       limit: 1000,
     })
       .then((items) => {
@@ -94,7 +94,7 @@ export class ContentfulBackend implements BackendModule {
           // eslint-disable-next-line @typescript-eslint/naming-convention
           'fields.namespace[in]': namespaces.join(','),
           // eslint-disable-next-line @typescript-eslint/naming-convention
-          content_type: 'translation',
+          content_type: 'translation', // TODO: make user input
           limit: 1000,
         })
       )

@@ -1,7 +1,7 @@
 {
   "name": "translations",
   "displayName": "Translations",
-  "description": "A vscode extension for displaying localized values or translation keys.",
+  "description": "A vscode extension for displaying localized values for translation keys.",
   "repository": {
     "type": "git",
     "url": "https://github.com/quinton22/vscode-translations.git"
@@ -9,6 +9,30 @@
   "publisher": "QuintonHoffman",
   "icon": "./assets/icon.png",
   "preview": true,
+  "release": {
+    "branches": [
+      "setup-ci",
+      "main",
+      "release",
+      {
+        "name": "prerelease",
+        "prerelease": true
+      }
+    ],
+    "plugins": [
+      "@semantic-release/commit-analyzer",
+      "@semantic-release/release-notes-generator",
+      "@semantic-release/github",
+      "@semantic-release/changelog",
+      [
+        "@semantic-release/exec",
+        {
+          "prepareCmd": "node ./release-scripts/prepare.ts",
+          "publishCmd": "yarn vsce publish --yarn$RELEASE_STR -p $MARKETPLACE_ACCESS_TOKEN"
+        }
+      ]
+    ]
+  },
   "keywords": [
     "translation",
     "translate",
@@ -20,7 +44,7 @@
   "license": "MIT",
   "engines": {
     "vscode": "^1.63.0",
-    "node": "^18.0.0"
+    "node": "^20.0.0"
   },
   "categories": [
     "Other"
@@ -230,6 +254,8 @@
     "test": "vscode-test"
   },
   "devDependencies": {
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/exec": "^6.0.3",
     "@types/glob": "^7.1.4",
     "@types/i18next-fs-backend": "^1.1.2",
     "@types/mocha": "^9.0.0",
@@ -243,6 +269,7 @@
     "eslint": "^8.56.0",
     "glob": "^7.1.7",
     "mocha": "^9.1.3",
+    "semantic-release": "^23.1.1",
     "ts-loader": "^9.5.1",
     "typescript": "^5.4.5",
     "webpack": "^5.91.0",

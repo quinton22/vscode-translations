@@ -1,0 +1,48 @@
+name: Release
+
+on:
+  workflow_call:
+    inputs:
+      prerelease:
+        required: true
+        type: boolean
+        default: false
+      release_type:
+        required: true
+        type: string
+        default: patch
+
+  workflow_dispatch:
+    inputs:
+      prerelease:
+        required: false
+        type: boolean
+        default: false
+      release_type:
+        required: true
+        type: choice
+        options:
+          - major
+          - minor
+          - patch
+        default: patch
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      # TODO: verify if version is different than main branch, if not then version bump
+      - name: Setup
+        uses: ./.github/actions/setup.yml
+        with: ${{ inputs.prerelease == 'true' && 'prerelease' || 'release' }}
+      - name: Package
+        run: yarn run vscode:prepublish
+      - name: Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_STR: ${{ inputs.prerelease == 'true' && ' --pre-release' || '' }}
+          MARKETPLACE_ACCESS_TOKEN: ${{secrets.MARKETPLACE_ACCESS_TOKEN}}
+        run: yarn semantic-release
+        # run: yarn vsce publish --yarn${{env.RELEASE_STR}} -p ${{env.MARKETPLACE_ACCESS_TOKEN}}
+      - name: Merge
+        run: /.github/actions/merge.yml

@@ -248,7 +248,7 @@
     "compile-tests": "tsc -p . --outDir out",
     "watch-tests": "tsc -p . -w --outDir out",
     "pretest": "yarn run compile-tests",
-    "pretest:ci": "/usr/bin/Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 && yarn pretest",
+    "pretest:ci": "/usr/bin/Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 & yarn pretest",
     "lint": "eslint src --ext ts",
     "typecheck": "tsc --noEmit",
     "test": "vscode-test",

@@ -61,5 +61,5 @@ jobs:
       - name: Merge
         uses: ./.github/actions/merge
         with:
-          base: main
+          base: ${{ inputs.prerelease == 'true' && 'release' || 'main' }}
           branch: ${{ env.BRANCH }}

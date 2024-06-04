@@ -19,9 +19,11 @@ jobs:
   release:
     runs-on: ubuntu-latest
     env:
-      RELEASE: ${{ inputs.prerelease == 'true' && ' --pre-release' }}
+      RELEASE: ${{ inputs.prerelease == true && ' --pre-release' }}
     steps:
-      - run: 'echo "Is pre-release: $RELEASE"'
+      - run: 'echo "yay!"'
+        if: ${{ inputs.prerelease == true }}
+      - run: exit 1
       - name: Checkout
         uses: actions/checkout@v4
       - name: Setup

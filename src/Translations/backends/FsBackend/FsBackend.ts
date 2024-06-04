@@ -4,13 +4,51 @@ import {
   MultiReadCallback,
   ReadCallback,
   Resource,
-  ResourceLanguage,
 } from 'i18next';
+import { FsBackendOptions } from 'i18next-fs-backend';
+import { resolve } from 'path';
+import { workspace } from 'vscode';
+import { existsSync } from 'fs';
 
 export class FsBackend extends I18nextFsBackend implements BackendModule {
-  read(language: string, namespace: string, callback: ReadCallback): void {
-    console.log('Q_DEBUG', 'fsread', language, namespace);
+  private loadPathWrapper(
+    loadPath?: string | ((lng: string, ns: string) => string)
+  ) {
+    if (typeof loadPath !== 'string') {
+      return loadPath;
+    }
+    return (language: string, namespace: string): string => {
+      let replacedPath = loadPath
+        .replace('{{lng}}', language)
+        .replace('{{ns}}', namespace);
+      const workspacePath = workspace.workspaceFolders?.[0].uri.path;
 
+      if (replacedPath.startsWith('~/')) {
+        replacedPath = replacedPath.replace('~/', process.env.HOME ?? '');
+      }
+      const absolutePath = resolve(workspacePath ?? '', replacedPath);
+
+      if (!existsSync(absolutePath)) {
+        console.warn(
+          '[Translations]',
+          'Attempted to load translations from non-existent file',
+          absolutePath
+        );
+      }
+
+      return absolutePath;
+    };
+  }
+
+  init(services?: any, options?: FsBackendOptions | undefined): void {
+    if (options && options.loadPath) {
+      options.loadPath = this.loadPathWrapper(options.loadPath);
+    }
+    console.log('[Translations]', 'init', options);
+    super.init(services, options);
+  }
+
+  read(language: string, namespace: string, callback: ReadCallback): void {
     super.read(language, namespace, callback);
   }
 
@@ -22,15 +60,12 @@ export class FsBackend extends I18nextFsBackend implements BackendModule {
       fallbackValue: string
     ]
   ): void {
-    console.log('Q_DEBUG', 'fscreate', ...args);
     super.create?.(...args);
   }
 
-  save(
-    ...args: [language: string, namespace: string, data: ResourceLanguage]
-  ): void {
-    console.log('Q_DEBUG', 'fssave', ...args);
-  }
+  // save(
+  //   ...args: [language: string, namespace: string, data: ResourceLanguage]
+  // ): void {}
 
   readMulti(
     languages: readonly string[],
@@ -51,32 +86,5 @@ export class FsBackend extends I18nextFsBackend implements BackendModule {
     }
 
     callback(null, r);
-  }
-
-  createFiles() {
-    // TODO: need to replace {{lng}} and {{ns}} with supportedLngs & ns
-    // const options = backendOptions.find((b) => {
-    //   const keys = Object.keys(b);
-    //   return keys.includes('loadPath') || keys.includes('addPath');
-    // });
-    // if (options) {
-    //   ['loadPath', 'addPath'].forEach((i) => {
-    //     if (i in options) {
-    //       const path = resolve(__dirname, options[i as keyof typeof options]);
-    //       console.log('Q_DEBUG', 'path', path);
-    //       mkdir(dirname(path), {
-    //         recursive: true,
-    //       })
-    //         .then(async () => {
-    //           const doesExist = existsSync(path);
-    //           console.log('Q_DEBUG', 'doesExist', path, doesExist);
-    //           if (!doesExist) {
-    //             await writeFile(path, '{}');
-    //           }
-    //         })
-    //         .catch((e) => console.error('[Translations]', e));
-    //     }
-    //   });
-    // }
   }
 }

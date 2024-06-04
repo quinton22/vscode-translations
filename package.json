@@ -245,6 +245,7 @@
     "test:ci": "DISPLAY=:99.0 vscode-test"
   },
   "devDependencies": {
+    "@semantic-release/exec": "^6.0.3",
     "@types/glob": "^8.1.0",
     "@types/i18next-fs-backend": "^1.1.2",
     "@types/mocha": "^9.0.0",

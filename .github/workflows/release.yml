@@ -6,6 +6,11 @@ on:
       - main
       - 'pre-release'
 
+permissions:
+      attestations: write
+      contents: write
+      deployments: write
+
 jobs:
   release:
     runs-on: ubuntu-latest

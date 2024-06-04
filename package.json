@@ -10,10 +10,9 @@
   "icon": "./assets/icon.png",
   "release": {
     "branches": [
-      "setup-ci",
       "main",
       {
-        "name": "prerelease",
+        "name": "pre-release",
         "prerelease": true
       }
     ],

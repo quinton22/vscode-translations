@@ -1,0 +1,24 @@
+name: Merge
+description: Merge branch to other branch
+
+inputs:
+  branch:
+    description: branch to merge into base branch
+    required: true
+  base:
+    description: the branch to checkout, will receive the merge commit
+    required: false
+    default: main
+
+runs:
+  using: composite
+  steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        ref: ${{ inputs.base }}
+    - name: Merge
+      uses: actions/checkout@v4
+      run: |
+        git merge ${{ inputs.branch }}
+        git push

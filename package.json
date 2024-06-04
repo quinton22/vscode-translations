@@ -1,14 +1,35 @@
 {
   "name": "translations",
   "displayName": "Translations",
-  "description": "A vscode extension for displaying localized values or translation keys.",
+  "description": "A vscode extension for displaying localized values for translation keys.",
   "repository": {
     "type": "git",
     "url": "https://github.com/quinton22/vscode-translations.git"
   },
   "publisher": "QuintonHoffman",
   "icon": "./assets/icon.png",
-  "preview": true,
+  "release": {
+    "branches": [
+      "setup-ci",
+      "main",
+      {
+        "name": "prerelease",
+        "prerelease": true
+      }
+    ],
+    "plugins": [
+      "@semantic-release/commit-analyzer",
+      "@semantic-release/release-notes-generator",
+      "@semantic-release/github",
+      [
+        "@semantic-release/exec",
+        {
+          "prepareCmd": "yarn vsce package$RELEASE",
+          "publishCmd": "yarn vsce publish$RELEASE --no-git-tag-version -p $VSCE_PAT -i $(find . -maxdepth 1 -type f -iname \"*.vsix\" | head -1)"
+        }
+      ]
+    ]
+  },
   "keywords": [
     "translation",
     "translate",
@@ -16,11 +37,11 @@
     "l10n",
     "localize"
   ],
-  "version": "0.1.0",
+  "version": "0.0.0-development",
   "license": "MIT",
   "engines": {
     "vscode": "^1.63.0",
-    "node": "^18.0.0"
+    "node": "^20.0.0"
   },
   "categories": [
     "Other"
@@ -217,12 +238,15 @@
     "package": "webpack --mode production --devtool hidden-source-map",
     "compile-tests": "tsc -p . --outDir out",
     "watch-tests": "tsc -p . -w --outDir out",
-    "pretest": "yarn run compile-tests && yarn run compile && yarn run lint",
+    "pretest": "yarn run compile-tests",
+    "pretest:ci": "/usr/bin/Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 & yarn pretest",
     "lint": "eslint src --ext ts",
-    "test": "node ./out/test/runTest.js"
+    "typecheck": "tsc --noEmit",
+    "test": "vscode-test",
+    "test:ci": "DISPLAY=:99.0 vscode-test"
   },
   "devDependencies": {
-    "@types/glob": "^7.1.4",
+    "@types/glob": "^8.1.0",
     "@types/i18next-fs-backend": "^1.1.2",
     "@types/mocha": "^9.0.0",
     "@types/node": "^18.0.0",
@@ -230,10 +254,12 @@
     "@types/vscode": "^1.61.0",
     "@typescript-eslint/eslint-plugin": "^7.9.0",
     "@typescript-eslint/parser": "^7.9.0",
+    "@vscode/test-cli": "^0.0.9",
     "@vscode/test-electron": "^1.6.2",
     "eslint": "^8.56.0",
-    "glob": "^7.1.7",
+    "glob": "^10.4.1",
     "mocha": "^9.1.3",
+    "semantic-release": "^24.0.0",
     "ts-loader": "^9.5.1",
     "typescript": "^5.4.5",
     "webpack": "^5.91.0",

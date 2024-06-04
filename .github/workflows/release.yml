@@ -7,10 +7,6 @@ on:
         required: true
         type: boolean
         default: false
-      # release_type:
-      #   required: true
-      #   type: string
-      #   default: patch
 
   workflow_dispatch:
     inputs:
@@ -18,14 +14,6 @@ on:
         required: false
         type: boolean
         default: false
-      # release_type:
-      #   required: true
-      #   type: choice
-      #   options:
-      #     - major
-      #     - minor
-      #     - patch
-      #   default: patch
 
 jobs:
   release:
@@ -38,28 +26,11 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: ${{ env.BRANCH }}
-      # TODO: verify if version is different than main branch, if not then version bump
       - name: Setup
         uses: ./.github/actions/setup
-      - name: Package
-        run: yarn vsce package${{env.RELEASE}}
-      - run: |
-          VSIX_PATH=$(find . -maxdepth 1 -type f -iname "*.vsix" | head -1)
-          echo "VSIX_PATH=$VSIX_PATH" >> $GITHUB_ENV
-          echo "VSIX_NAME=$(basename $VSIX_PATH)" >> $GITHUB_ENV
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          path: ${{ env.VSIX_PATH }}
-          name: ${{ env.VSIX_NAME }}
       - name: Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          VSCE_PAT: ${{secrets.MARKETPLACE_ACCESS_TOKEN}}
-
-        run: yarn vsce publish${{env.RELEASE}} -p ${{env.VSCE_PAT}}
-      - name: Merge
-        uses: ./.github/actions/merge
-        with:
-          base: ${{ inputs.prerelease == 'true' && 'release' || 'main' }}
-          branch: ${{ env.BRANCH }}
+          VSCE_PAT: ${{ secrets.MARKETPLACE_ACCESS_TOKEN }}
+          RELEASE: ${{ env.RELEASE }}
+        run: yarn semantic-release

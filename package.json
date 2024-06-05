@@ -27,7 +27,7 @@
       [
         "@semantic-release/exec",
         {
-          "prepareCmd": "yarn run vsce package$RELEASE ${nextRelease.version}",
+          "prepareCmd": "yarn run vsce package$RELEASE --no-git-tag-version ${nextRelease.version}",
           "publishCmd": "yarn run vsce publish$RELEASE --no-git-tag-version -p $VSCE_PAT -i $(find . -maxdepth 1 -type f -iname \"*.vsix\" | head -1) ${nextRelease.version}"
         }
       ]

@@ -11,14 +11,8 @@
   "release": {
     "branches": [
       "main",
-      {
-        "name": "actions-test",
-        "prerelease": true
-      },
-      {
-        "name": "pre-release",
-        "prerelease": true
-      }
+      "actions-test",
+      "pre-release"
     ],
     "plugins": [
       "@semantic-release/commit-analyzer",

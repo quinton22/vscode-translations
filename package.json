@@ -23,8 +23,8 @@
       [
         "@semantic-release/exec",
         {
-          "prepareCmd": "yarn vsce package$RELEASE",
-          "publishCmd": "yarn vsce publish$RELEASE --no-git-tag-version -p $VSCE_PAT -i $(find . -maxdepth 1 -type f -iname \"*.vsix\" | head -1)"
+          "prepareCmd": "yarn run vsce package$RELEASE",
+          "publishCmd": "yarn run vsce publish$RELEASE --no-git-tag-version -p $VSCE_PAT -i $(find . -maxdepth 1 -type f -iname \"*.vsix\" | head -1)"
         }
       ]
     ]
@@ -256,6 +256,7 @@
     "@typescript-eslint/parser": "^7.9.0",
     "@vscode/test-cli": "^0.0.9",
     "@vscode/test-electron": "^1.6.2",
+    "@vscode/vsce": "^2.27.0",
     "eslint": "^8.56.0",
     "glob": "^10.4.1",
     "mocha": "^9.1.3",

@@ -11,7 +11,10 @@
   "release": {
     "branches": [
       "main",
-      "actions-test",
+      {
+        "name": "actions-test",
+        "prerelease": true
+      },
       {
         "name": "pre-release",
         "prerelease": true

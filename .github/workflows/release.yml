@@ -1,31 +1,23 @@
 name: Release
 
 on:
-  workflow_call:
-    inputs:
-      prerelease:
-        required: true
-        type: boolean
-        default: false
+  push:
+    branches:
+      - main
+      - 'pre-release'
 
-  workflow_dispatch:
-    inputs:
-      prerelease:
-        required: false
-        type: boolean
-        default: false
+permissions:
+  contents: write
+  deployments: write
 
 jobs:
   release:
     runs-on: ubuntu-latest
     env:
-      BRANCH: ${{ inputs.prerelease == 'true' && 'prerelease' || 'release' }}
-      RELEASE: ${{ inputs.prerelease == 'true' && ' --pre-release' }}
+      RELEASE: ${{ github.ref_name != 'main' && ' --pre-release' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          ref: ${{ env.BRANCH }}
       - name: Setup
         uses: ./.github/actions/setup
       - name: Release

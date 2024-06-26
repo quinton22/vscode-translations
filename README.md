@@ -12,11 +12,11 @@ Additionally, the [I18n Options](#setting_i18nOptions) settings are required unl
 
 ### Contentful
 
-To enable Contentful backend, add `contentful` to the [Backend > List](#setting_list) setting. Then fill in all the required settings in [Backend > Contentful Options](#setting_contentfulOptions) seen below.
+To enable Contentful backend, add `contentful` to the [Backend > List](#setting_list) setting. Then fill in all the required settings in [Backend > Contentful Options](#setting_contentfulOptions).
 
 ### File System
 
-To enable File System backend, add `fileSystem` to the [Backend > List](#setting_list) setting. Add the load path according to the [Backend > File System Options](#setting_fileSystemOptions) setting below
+To enable File System backend, add `fileSystem` to the [Backend > List](#setting_list) setting. Add the load path according to the [Backend > File System Options](#setting_fileSystemOptions).
 
 ## Features
 
@@ -60,7 +60,7 @@ To enable File System backend, add `fileSystem` to the [Backend > List](#setting
 
 ## Release Notes
 
-See [CHANGELOG](./CHANGELOG.md)
+[Releases](https://github.com/quinton22/vscode-translations/releases)
 
 <!--
 Ensure that you've read through the extensions guidelines and follow the best practices for creating your extension.
